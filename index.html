@@ -5,22 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>JobCrystal — Найди работу мечты в Telegram</title>
 <meta name="description" content="Telegram-бот, который подбирает вакансии и находит идеальный матч между тобой и работодателем.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23F8C8DC'/%3E%3Cstop offset='50%25' stop-color='%23B4A7E8'/%3E%3Cstop offset='100%25' stop-color='%239B7EDE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z' fill='url(%23g)' stroke='%236B4FA0' stroke-width='2'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#050A1A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2338BDF8'/%3E%3Cstop offset='50%25' stop-color='%233B82F6'/%3E%3Cstop offset='100%25' stop-color='%236366F1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z' fill='url(%23g)' stroke='%230B1120' stroke-width='2'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --lavender-bg:#F3EFFF;
-    --pink-bg:#FFF0F7;
-    --lavender:#B4A7E8;
-    --lavender-deep:#9B7EDE;
-    --pink:#F8C8DC;
-    --pink-deep:#F5A9C7;
-    --violet-deep:#6B4FA0;
-    --glass:rgba(255,255,255,0.55);
-    --glass-strong:rgba(255,255,255,0.72);
-    --glass-border:rgba(255,255,255,0.8);
+    --bg-0:#050A1A;
+    --bg-1:#08122B;
+    --bg-2:#0A1838;
+    --blue:#3B82F6;
+    --blue-deep:#2563EB;
+    --cyan:#38BDF8;
+    --cyan-bright:#22D3EE;
+    --indigo:#6366F1;
+    --text:#E8EFFF;
+    --text-muted:#9FB2D8;
+    --glass:rgba(255,255,255,0.05);
+    --glass-strong:rgba(255,255,255,0.09);
+    --glass-border:rgba(120,160,255,0.18);
     --ease:cubic-bezier(0.22,1,0.36,1);
   }
 
@@ -28,8 +32,8 @@
   html{scroll-behavior:smooth;}
   body{
     font-family:'Onest','Manrope',sans-serif;
-    color:var(--violet-deep);
-    background:linear-gradient(120deg,var(--lavender-bg),var(--pink-bg),#F1E9FF,var(--pink-bg));
+    color:var(--text);
+    background:linear-gradient(120deg,#050A1A,#08122B,#0A1838,#060C22);
     background-size:300% 300%;
     animation:gradientShift 22s ease infinite;
     overflow-x:hidden;
@@ -59,14 +63,14 @@
   .blob{
     position:absolute;
     border-radius:50%;
-    filter:blur(60px);
-    opacity:0.55;
+    filter:blur(70px);
+    opacity:0.5;
     animation:blobFloat 18s ease-in-out infinite;
   }
-  .blob1{width:420px;height:420px;background:radial-gradient(circle,var(--pink),transparent 70%);top:-120px;left:-100px;animation-duration:20s;}
-  .blob2{width:520px;height:520px;background:radial-gradient(circle,var(--lavender),transparent 70%);top:30%;right:-180px;animation-duration:26s;animation-delay:-4s;}
-  .blob3{width:380px;height:380px;background:radial-gradient(circle,var(--pink-deep),transparent 70%);bottom:-140px;left:20%;animation-duration:24s;animation-delay:-8s;}
-  .blob4{width:300px;height:300px;background:radial-gradient(circle,var(--lavender-deep),transparent 70%);bottom:10%;right:10%;animation-duration:19s;animation-delay:-12s;}
+  .blob1{width:420px;height:420px;background:radial-gradient(circle,var(--blue),transparent 70%);top:-120px;left:-100px;animation-duration:20s;}
+  .blob2{width:520px;height:520px;background:radial-gradient(circle,var(--indigo),transparent 70%);top:30%;right:-180px;animation-duration:26s;animation-delay:-4s;}
+  .blob3{width:380px;height:380px;background:radial-gradient(circle,var(--cyan),transparent 70%);bottom:-140px;left:20%;animation-duration:24s;animation-delay:-8s;opacity:0.35;}
+  .blob4{width:300px;height:300px;background:radial-gradient(circle,var(--blue-deep),transparent 70%);bottom:10%;right:10%;animation-duration:19s;animation-delay:-12s;}
 
   @keyframes blobFloat{
     0%,100%{transform:translate(0,0) scale(1);}
@@ -77,8 +81,8 @@
   .particle{
     position:absolute;
     border-radius:2px;
-    background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(180,167,232,0.4));
-    box-shadow:0 0 12px rgba(255,255,255,0.8);
+    background:linear-gradient(135deg,rgba(200,230,255,0.95),rgba(59,130,246,0.4));
+    box-shadow:0 0 12px rgba(120,190,255,0.8);
     animation:particleDrift linear infinite;
     transform:rotate(45deg);
   }
@@ -86,7 +90,7 @@
   @keyframes particleDrift{
     0%{transform:translateY(0) rotate(45deg);opacity:0;}
     10%{opacity:0.9;}
-    90%{opacity:0.6;}
+    90%{opacity:0.5;}
     100%{transform:translateY(-100vh) rotate(200deg);opacity:0;}
   }
 
@@ -115,7 +119,7 @@
     -webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid var(--glass-border);
     border-radius:22px;
-    box-shadow:0 8px 30px rgba(155,126,222,0.15);
+    box-shadow:0 8px 30px rgba(0,10,40,0.5);
   }
   .brand{
     display:flex;
@@ -123,6 +127,7 @@
     gap:10px;
     font-weight:800;
     font-size:1.1rem;
+    color:var(--text);
   }
   .brand svg{width:30px;height:30px;}
   .nav-cta{
@@ -130,13 +135,13 @@
     border-radius:16px;
     font-weight:700;
     font-size:0.9rem;
-    background:linear-gradient(135deg,var(--lavender-deep),var(--pink-deep));
+    background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
     color:#fff;
-    box-shadow:0 6px 18px rgba(155,126,222,0.35);
+    box-shadow:0 6px 20px rgba(56,189,248,0.35);
     transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease);
     white-space:nowrap;
   }
-  .nav-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 26px rgba(155,126,222,0.45);}
+  .nav-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 28px rgba(56,189,248,0.5);}
 
   section{
     position:relative;
@@ -163,7 +168,7 @@
     backdrop-filter:blur(10px);
     font-size:0.8rem;
     font-weight:600;
-    color:var(--violet-deep);
+    color:var(--cyan);
     margin-bottom:20px;
     letter-spacing:0.02em;
   }
@@ -172,10 +177,11 @@
     font-family:'Manrope','Onest',sans-serif;
     line-height:1.12;
     font-weight:800;
+    color:var(--text);
   }
 
   .gradient-text{
-    background:linear-gradient(100deg,var(--violet-deep) 10%,var(--lavender-deep) 40%,var(--pink-deep) 70%,var(--violet-deep) 100%);
+    background:linear-gradient(100deg,var(--cyan) 10%,var(--blue) 40%,var(--indigo) 70%,var(--cyan-bright) 100%);
     background-size:250% auto;
     -webkit-background-clip:text;
     background-clip:text;
@@ -188,15 +194,17 @@
 
   /* HERO */
   .hero{
-    padding-top:70px;
+    padding:56px 0 90px;
+  }
+  .hero .container{
     display:flex;
     align-items:center;
     gap:60px;
-    min-height:88vh;
+    flex-wrap:wrap;
   }
-  .hero-content{flex:1.05;}
+  .hero-content{flex:1 1 440px;min-width:0;}
   .hero-visual{
-    flex:0.95;
+    flex:1 1 360px;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -209,7 +217,7 @@
   }
   .hero-sub{
     font-size:clamp(1rem,1.6vw,1.2rem);
-    color:#5b4a86;
+    color:var(--text-muted);
     max-width:520px;
     margin-bottom:36px;
     line-height:1.6;
@@ -230,8 +238,8 @@
     font-weight:700;
     font-size:1.05rem;
     color:#fff;
-    background:linear-gradient(135deg,var(--lavender-deep),var(--pink-deep) 100%);
-    box-shadow:0 10px 30px rgba(155,126,222,0.4);
+    background:linear-gradient(135deg,var(--blue-deep),var(--cyan) 100%);
+    box-shadow:0 10px 30px rgba(37,99,235,0.45);
     transition:transform 0.35s var(--ease),box-shadow 0.35s var(--ease);
     animation:ctaPulse 2.6s ease-in-out infinite;
     overflow:hidden;
@@ -241,18 +249,18 @@
     position:absolute;
     inset:0;
     border-radius:inherit;
-    background:linear-gradient(135deg,rgba(255,255,255,0.5),transparent 60%);
+    background:linear-gradient(135deg,rgba(255,255,255,0.45),transparent 60%);
     opacity:0;
     transition:opacity 0.3s var(--ease);
   }
   .btn-primary:hover{
     transform:translateY(-4px) scale(1.045);
-    box-shadow:0 18px 44px rgba(155,126,222,0.55);
+    box-shadow:0 18px 48px rgba(56,189,248,0.6);
   }
   .btn-primary:hover::after{opacity:1;}
   @keyframes ctaPulse{
-    0%,100%{box-shadow:0 10px 30px rgba(155,126,222,0.4),0 0 0 0 rgba(245,169,199,0.5);}
-    50%{box-shadow:0 10px 30px rgba(155,126,222,0.4),0 0 0 14px rgba(245,169,199,0);}
+    0%,100%{box-shadow:0 10px 30px rgba(37,99,235,0.45),0 0 0 0 rgba(56,189,248,0.5);}
+    50%{box-shadow:0 10px 30px rgba(37,99,235,0.45),0 0 0 14px rgba(56,189,248,0);}
   }
   .btn-secondary{
     padding:18px 30px;
@@ -262,7 +270,7 @@
     background:var(--glass);
     border:1px solid var(--glass-border);
     backdrop-filter:blur(16px);
-    color:var(--violet-deep);
+    color:var(--text);
     transition:transform 0.3s var(--ease),background 0.3s var(--ease);
   }
   .btn-secondary:hover{transform:translateY(-3px);background:var(--glass-strong);}
@@ -273,7 +281,7 @@
     margin-top:36px;
     flex-wrap:wrap;
     font-size:0.85rem;
-    color:#6f5c9c;
+    color:var(--text-muted);
   }
   .hero-tags span{
     display:flex;
@@ -285,7 +293,7 @@
     border-radius:14px;
     backdrop-filter:blur(10px);
   }
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--pink-deep);box-shadow:0 0 8px var(--pink-deep);}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
 
   /* crystal logo */
   .crystal-wrap{
@@ -299,8 +307,8 @@
   .crystal-glow{
     position:absolute;
     inset:-15%;
-    background:radial-gradient(circle,rgba(248,200,220,0.55),rgba(180,167,232,0.35) 45%,transparent 70%);
-    filter:blur(40px);
+    background:radial-gradient(circle,rgba(56,189,248,0.5),rgba(99,102,241,0.35) 45%,transparent 70%);
+    filter:blur(45px);
     border-radius:50%;
     animation:glowPulse 4s ease-in-out infinite;
     z-index:0;
@@ -310,7 +318,7 @@
     z-index:1;
     width:100%;
     height:100%;
-    filter:drop-shadow(0 20px 45px rgba(155,126,222,0.45));
+    filter:drop-shadow(0 20px 50px rgba(56,189,248,0.5));
   }
   @keyframes floaty{
     0%,100%{transform:translateY(0px) rotate(-2deg);}
@@ -332,7 +340,7 @@
     margin-bottom:14px;
   }
   .section-head p{
-    color:#5b4a86;
+    color:var(--text-muted);
     font-size:1.05rem;
   }
 
@@ -343,13 +351,14 @@
     -webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid var(--glass-border);
     border-radius:26px;
-    box-shadow:0 8px 32px rgba(155,126,222,0.16);
-    transition:transform 0.4s var(--ease),box-shadow 0.4s var(--ease),background 0.4s var(--ease);
+    box-shadow:0 8px 32px rgba(0,10,40,0.45);
+    transition:transform 0.4s var(--ease),box-shadow 0.4s var(--ease),background 0.4s var(--ease),border-color 0.4s var(--ease);
   }
   .glass-card:hover{
     transform:translateY(-8px) scale(1.015);
-    box-shadow:0 20px 50px rgba(155,126,222,0.28);
+    box-shadow:0 20px 55px rgba(56,189,248,0.28);
     background:var(--glass-strong);
+    border-color:rgba(120,190,255,0.4);
   }
 
   /* HOW IT WORKS */
@@ -368,19 +377,19 @@
     right:22px;
     font-size:2.2rem;
     font-weight:800;
-    color:rgba(155,126,222,0.25);
+    color:rgba(120,160,255,0.22);
   }
   .step-icon{
     width:56px;height:56px;
     border-radius:18px;
     display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,var(--pink),var(--lavender));
+    background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
     margin-bottom:20px;
-    box-shadow:0 8px 20px rgba(155,126,222,0.3);
+    box-shadow:0 8px 22px rgba(56,189,248,0.35);
   }
-  .step-icon svg{width:26px;height:26px;stroke:var(--violet-deep);}
+  .step-icon svg{width:26px;height:26px;stroke:#fff;}
   .step-card h3{font-size:1.15rem;margin-bottom:10px;}
-  .step-card p{color:#5b4a86;font-size:0.94rem;line-height:1.55;}
+  .step-card p{color:var(--text-muted);font-size:0.94rem;line-height:1.55;}
 
   /* FEATURES */
   .features-grid{
@@ -394,7 +403,7 @@
   }
   .feature-card .step-icon{margin-bottom:18px;}
   .feature-card h3{font-size:1.05rem;margin-bottom:8px;}
-  .feature-card p{font-size:0.9rem;color:#5b4a86;line-height:1.5;}
+  .feature-card p{font-size:0.9rem;color:var(--text-muted);line-height:1.5;}
 
   /* STATS */
   .stats-panel{
@@ -410,14 +419,14 @@
     font-family:'Manrope',sans-serif;
     font-size:clamp(2.2rem,5vw,3.2rem);
     font-weight:800;
-    background:linear-gradient(120deg,var(--violet-deep),var(--lavender-deep),var(--pink-deep));
+    background:linear-gradient(120deg,var(--cyan),var(--blue),var(--indigo));
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
   }
   .stat-label{
     margin-top:8px;
-    color:#5b4a86;
+    color:var(--text-muted);
     font-weight:600;
     font-size:0.95rem;
   }
@@ -437,15 +446,18 @@
     backdrop-filter:blur(14px);
     font-weight:600;
     font-size:0.95rem;
+    color:var(--text);
     display:flex;
     align-items:center;
     gap:8px;
-    transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease),background 0.3s var(--ease);
+    transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease),background 0.3s var(--ease),border-color 0.3s var(--ease);
   }
   .chip:hover{
     transform:translateY(-4px) scale(1.05);
-    background:linear-gradient(135deg,var(--pink),var(--lavender));
-    box-shadow:0 10px 24px rgba(155,126,222,0.3);
+    background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
+    border-color:transparent;
+    color:#fff;
+    box-shadow:0 10px 26px rgba(56,189,248,0.4);
   }
 
   /* FINAL CTA */
@@ -454,14 +466,14 @@
     padding:70px 40px;
     position:relative;
     overflow:hidden;
-    background:linear-gradient(135deg,rgba(180,167,232,0.35),rgba(248,200,220,0.35));
+    background:linear-gradient(135deg,rgba(59,130,246,0.18),rgba(56,189,248,0.16));
   }
   .final-cta h2{
     font-size:clamp(1.8rem,4vw,2.6rem);
     margin-bottom:16px;
   }
   .final-cta p{
-    color:#5b4a86;
+    color:var(--text-muted);
     max-width:520px;
     margin:0 auto 34px;
     font-size:1.05rem;
@@ -484,14 +496,15 @@
     flex-wrap:wrap;
     justify-content:center;
     font-size:0.9rem;
-    color:#6f5c9c;
+    color:var(--text-muted);
   }
   .footer-links a{transition:color 0.3s var(--ease);}
-  .footer-links a:hover{color:var(--violet-deep);}
-  .footer-copy{font-size:0.82rem;color:#8577ab;}
+  .footer-links a:hover{color:var(--cyan);}
+  .footer-copy{font-size:0.82rem;color:#6D80AA;}
 
   @media (max-width:980px){
-    .hero{flex-direction:column;text-align:center;gap:36px;padding-top:30px;}
+    .hero .container{flex-direction:column;text-align:center;gap:36px;}
+    .hero-content{flex-basis:auto;}
     .hero-sub{margin-left:auto;margin-right:auto;}
     .cta-row{justify-content:center;}
     .hero-tags{justify-content:center;}
@@ -526,12 +539,12 @@
         <svg viewBox="0 0 100 100" aria-hidden="true">
           <defs>
             <linearGradient id="navg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#F8C8DC"/>
-              <stop offset="50%" stop-color="#B4A7E8"/>
-              <stop offset="100%" stop-color="#9B7EDE"/>
+              <stop offset="0%" stop-color="#38BDF8"/>
+              <stop offset="50%" stop-color="#3B82F6"/>
+              <stop offset="100%" stop-color="#6366F1"/>
             </linearGradient>
           </defs>
-          <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#6B4FA0" stroke-width="2"/>
+          <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#0B1120" stroke-width="2"/>
         </svg>
         JobCrystal
       </div>
@@ -542,7 +555,7 @@
 
 <main>
   <section class="hero">
-    <div class="container" style="display:flex;align-items:center;gap:60px;flex-wrap:wrap;">
+    <div class="container">
       <div class="hero-content reveal in-view">
         <span class="eyebrow">✨ Умный подбор вакансий в Telegram</span>
         <h1 class="hero-title">Найди работу мечты <span class="gradient-text">за пару минут</span></h1>
@@ -566,25 +579,25 @@
           <svg class="crystal-svg" viewBox="0 0 200 200">
             <defs>
               <linearGradient id="crystalMain" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#F8C8DC"/>
-                <stop offset="35%" stop-color="#F5A9C7"/>
-                <stop offset="65%" stop-color="#B4A7E8"/>
-                <stop offset="100%" stop-color="#9B7EDE"/>
+                <stop offset="0%" stop-color="#7DD3FC"/>
+                <stop offset="35%" stop-color="#38BDF8"/>
+                <stop offset="65%" stop-color="#3B82F6"/>
+                <stop offset="100%" stop-color="#6366F1"/>
               </linearGradient>
               <linearGradient id="crystalShine" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-                <stop offset="50%" stop-color="#cfe8ff" stop-opacity="0.4"/>
+                <stop offset="50%" stop-color="#bae6fd" stop-opacity="0.4"/>
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
               </linearGradient>
             </defs>
             <path d="M100 8 L128 72 L192 100 L128 128 L100 192 L72 128 L8 100 L72 72 Z"
-                  fill="url(#crystalMain)" stroke="#ffffff" stroke-width="2" stroke-opacity="0.7"/>
-            <path d="M100 8 L128 72 L100 100 L72 72 Z" fill="url(#crystalShine)" opacity="0.8"/>
-            <path d="M192 100 L128 72 L100 100 L128 128 Z" fill="#ffffff" opacity="0.18"/>
+                  fill="url(#crystalMain)" stroke="#cfeaff" stroke-width="2" stroke-opacity="0.6"/>
+            <path d="M100 8 L128 72 L100 100 L72 72 Z" fill="url(#crystalShine)" opacity="0.85"/>
+            <path d="M192 100 L128 72 L100 100 L128 128 Z" fill="#ffffff" opacity="0.16"/>
             <path d="M100 76 L116 84 L124 100 L116 116 L100 124 L84 116 L76 100 L84 84 Z"
-                  fill="#FFF8FB" fill-opacity="0.9" stroke="#B4A7E8" stroke-width="1.5"/>
+                  fill="#0A1838" fill-opacity="0.55" stroke="#7DD3FC" stroke-width="1.5"/>
             <path d="M100 76 L116 84 L124 100 L116 116 L100 124 L84 116 L76 100 L84 84 Z"
-                  fill="#F3EFFF" fill-opacity="0.5"/>
+                  fill="#1E3A8A" fill-opacity="0.35"/>
           </svg>
         </div>
       </div>
@@ -719,7 +732,7 @@
     <div class="footer-inner">
       <div class="brand">
         <svg viewBox="0 0 100 100" width="26" height="26" aria-hidden="true">
-          <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#6B4FA0" stroke-width="2"/>
+          <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#0B1120" stroke-width="2"/>
         </svg>
         JobCrystal
       </div>
