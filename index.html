@@ -3,805 +3,425 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>MizoJob — Найди работу мечты в Telegram</title>
-<meta name="description" content="MizoJob — Telegram-бот, который подбирает вакансии и находит идеальный матч между тобой и работодателем.">
-<meta name="theme-color" content="#050A1A">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2338BDF8'/%3E%3Cstop offset='50%25' stop-color='%233B82F6'/%3E%3Cstop offset='100%25' stop-color='%236366F1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z' fill='url(%23g)' stroke='%230B1120' stroke-width='2'/%3E%3C/svg%3E">
+<title>MizoJob — подбор вакансий в Telegram</title>
+<meta name="description" content="MizoJob — Telegram-бот, который подбирает вакансии под тебя и соединяет с работодателями напрямую.">
+<meta name="theme-color" content="#08080A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2385A9FF'/%3E%3Cstop offset='100%25' stop-color='%235B8CFF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-0:#050A1A;
-    --bg-1:#08122B;
-    --bg-2:#0A1838;
-    --blue:#3B82F6;
-    --blue-deep:#2563EB;
-    --cyan:#38BDF8;
-    --cyan-bright:#22D3EE;
-    --indigo:#6366F1;
-    --text:#E8EFFF;
-    --text-muted:#9FB2D8;
-    --glass:rgba(255,255,255,0.05);
-    --glass-strong:rgba(255,255,255,0.09);
-    --glass-border:rgba(120,160,255,0.18);
+    --bg:#08080A;
+    --bg-elev:#0D0D10;
+    --card:#0C0C0F;
+    --card-hover:#101014;
+    --border:rgba(255,255,255,0.08);
+    --border-strong:rgba(255,255,255,0.14);
+    --text:#F4F4F5;
+    --muted:#9B9BA6;
+    --dim:#6A6A76;
+    --accent:#5B8CFF;
+    --accent-hover:#6E99FF;
+    --accent-soft:rgba(91,140,255,0.12);
     --ease:cubic-bezier(0.22,1,0.36,1);
-    --ease-soft:cubic-bezier(0.4,0,0.2,1);
+    --maxw:1080px;
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
   body{
-    font-family:'Onest','Manrope',sans-serif;
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
     color:var(--text);
-    background:linear-gradient(120deg,#050A1A,#08122B,#0A1838,#060C22);
-    background-size:300% 300%;
-    animation:gradientShift 22s ease infinite;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
     overflow-x:hidden;
-    min-height:100vh;
-    position:relative;
   }
-
-  @keyframes gradientShift{
-    0%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-    100%{background-position:0% 50%;}
+  /* single, static ambient glow — no animated gradients or blobs */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:
+      radial-gradient(900px 520px at 50% -8%, rgba(91,140,255,0.13), transparent 60%),
+      radial-gradient(700px 500px at 85% 8%, rgba(91,140,255,0.05), transparent 55%);
+    pointer-events:none;
   }
-
   a{color:inherit;text-decoration:none;}
   img,svg{display:block;}
-  ul{list-style:none;}
-  button{font-family:inherit;border:none;cursor:pointer;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
 
-  /* ===== scroll progress bar ===== */
-  .scroll-progress{
-    position:fixed;
-    top:0;left:0;
-    height:3px;width:0%;
-    z-index:100;
-    background:linear-gradient(90deg,var(--cyan),var(--blue),var(--indigo));
-    box-shadow:0 0 12px rgba(56,189,248,0.7);
-    transition:width 0.1s linear;
-  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:1;}
 
-  /* ===== hover companion (crystal logo appears when hovering elements) ===== */
-  .cursor-star{
-    position:fixed;
-    top:0;left:0;
-    width:34px;height:34px;
-    pointer-events:none;
-    z-index:9999;
-    opacity:0;
+  /* ===== subtle hover companion (crystal mark) ===== */
+  .companion{
+    position:fixed;top:0;left:0;width:22px;height:22px;
+    pointer-events:none;z-index:200;opacity:0;
     transform:translate(-50%,-50%) scale(0);
-    filter:drop-shadow(0 0 10px rgba(56,189,248,0.9));
-    transition:opacity 0.3s var(--ease);
-    will-change:transform,opacity;
-  }
-  .cursor-star svg{width:100%;height:100%;animation:spinSlow 6s linear infinite;}
-  @keyframes spinSlow{to{transform:rotate(360deg);}}
-
-  /* background blobs & particles */
-  .bg-decor{
-    position:fixed;
-    inset:0;
-    z-index:0;
-    overflow:hidden;
-    pointer-events:none;
-  }
-  .blob{
-    position:absolute;
-    border-radius:50%;
-    filter:blur(70px);
-    opacity:0.5;
-    animation:blobFloat 18s ease-in-out infinite;
-  }
-  .blob1{width:420px;height:420px;background:radial-gradient(circle,var(--blue),transparent 70%);top:-120px;left:-100px;animation-duration:20s;}
-  .blob2{width:520px;height:520px;background:radial-gradient(circle,var(--indigo),transparent 70%);top:30%;right:-180px;animation-duration:26s;animation-delay:-4s;}
-  .blob3{width:380px;height:380px;background:radial-gradient(circle,var(--cyan),transparent 70%);bottom:-140px;left:20%;animation-duration:24s;animation-delay:-8s;opacity:0.35;}
-  .blob4{width:300px;height:300px;background:radial-gradient(circle,var(--blue-deep),transparent 70%);bottom:10%;right:10%;animation-duration:19s;animation-delay:-12s;}
-
-  @keyframes blobFloat{
-    0%,100%{transform:translate(0,0) scale(1);}
-    33%{transform:translate(30px,-40px) scale(1.08);}
-    66%{transform:translate(-25px,30px) scale(0.95);}
+    transition:opacity .3s var(--ease);
+    filter:drop-shadow(0 0 6px rgba(91,140,255,0.6));
   }
 
-  .particle{
-    position:absolute;
-    border-radius:2px;
-    background:linear-gradient(135deg,rgba(200,230,255,0.95),rgba(59,130,246,0.4));
-    box-shadow:0 0 12px rgba(120,190,255,0.8);
-    animation:particleDrift linear infinite;
-    transform:rotate(45deg);
-  }
-
-  @keyframes particleDrift{
-    0%{transform:translateY(0) rotate(45deg);opacity:0;}
-    10%{opacity:0.9;}
-    90%{opacity:0.5;}
-    100%{transform:translateY(-100vh) rotate(200deg);opacity:0;}
-  }
-
-  .container{
-    max-width:1180px;
-    margin:0 auto;
-    padding:0 24px;
-    position:relative;
-    z-index:1;
-  }
-
-  /* NAV */
-  header{
-    position:sticky;
-    top:0;
-    z-index:50;
-    padding:16px 0;
-  }
-  .nav-inner{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px 22px;
-    background:var(--glass);
-    backdrop-filter:blur(20px) saturate(160%);
-    -webkit-backdrop-filter:blur(20px) saturate(160%);
-    border:1px solid var(--glass-border);
-    border-radius:22px;
-    box-shadow:0 8px 30px rgba(0,10,40,0.5);
-    transition:box-shadow 0.4s var(--ease),background 0.4s var(--ease);
-  }
-  header.scrolled .nav-inner{
-    background:rgba(8,18,43,0.65);
-    box-shadow:0 10px 40px rgba(0,10,40,0.7);
-  }
-  .brand{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight:800;
-    font-size:1.1rem;
-    color:var(--text);
-  }
-  .brand svg{width:30px;height:30px;transition:transform 0.5s var(--ease);}
-  .brand:hover svg{transform:rotate(90deg) scale(1.1);}
-  .nav-cta{
-    padding:10px 20px;
-    border-radius:16px;
-    font-weight:700;
-    font-size:0.9rem;
-    background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
-    color:#fff;
-    box-shadow:0 6px 20px rgba(56,189,248,0.35);
-    transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease);
-    white-space:nowrap;
-  }
-  .nav-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 28px rgba(56,189,248,0.5);}
-
-  section{
-    position:relative;
-    z-index:1;
-    padding:100px 0;
-  }
-
-  .reveal{
-    opacity:0;
-    transform:translateY(38px);
-    transition:opacity 0.9s var(--ease),transform 0.9s var(--ease);
-    transition-delay:var(--reveal-delay,0ms);
-  }
-  .reveal.in-view{
-    opacity:1;
-    transform:translateY(0);
-  }
-
+  /* ===== typography helpers ===== */
   .eyebrow{
-    display:inline-block;
-    padding:6px 16px;
-    border-radius:100px;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    backdrop-filter:blur(10px);
-    font-size:0.8rem;
-    font-weight:600;
-    color:var(--cyan);
-    margin-bottom:20px;
-    letter-spacing:0.02em;
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--accent);
   }
+  .eyebrow::before{content:"";width:16px;height:1px;background:var(--accent);opacity:0.7;}
+  h1,h2,h3{font-weight:600;letter-spacing:-0.02em;color:var(--text);line-height:1.08;}
 
-  h1,h2,h3{
-    font-family:'Manrope','Onest',sans-serif;
-    line-height:1.12;
-    font-weight:800;
-    color:var(--text);
+  /* ===== header ===== */
+  header{
+    position:sticky;top:0;z-index:100;
+    border-bottom:1px solid transparent;
+    background:transparent;
+    transition:background .3s var(--ease),border-color .3s var(--ease),backdrop-filter .3s var(--ease);
   }
+  header.scrolled{
+    background:rgba(8,8,10,0.72);
+    backdrop-filter:blur(12px) saturate(160%);
+    -webkit-backdrop-filter:blur(12px) saturate(160%);
+    border-bottom:1px solid var(--border);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-0.01em;}
+  .brand .mark{width:24px;height:24px;}
+  .nav-links{display:flex;gap:30px;}
+  .nav-links a{font-size:14px;color:var(--muted);transition:color .2s var(--ease);}
+  .nav-links a:hover{color:var(--text);}
+  .nav-right{display:flex;align-items:center;gap:14px;}
 
-  .gradient-text{
-    background:linear-gradient(100deg,var(--cyan) 10%,var(--blue) 40%,var(--indigo) 70%,var(--cyan-bright) 100%);
-    background-size:250% auto;
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    animation:textShine 8s linear infinite;
-  }
-  @keyframes textShine{
-    to{background-position:250% center;}
-  }
-
-  /* HERO */
-  .hero{
-    padding:56px 0 90px;
-  }
-  .hero .container{
-    display:flex;
-    align-items:center;
-    gap:60px;
-    flex-wrap:wrap;
-  }
-  .hero-content{flex:1 1 440px;min-width:0;}
-  .hero-visual{
-    flex:1 1 360px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    perspective:1000px;
-  }
-  h1.hero-title{
-    font-size:clamp(2.2rem,5vw,3.6rem);
-    margin-bottom:22px;
-    letter-spacing:-0.01em;
-  }
-  .hero-sub{
-    font-size:clamp(1rem,1.6vw,1.2rem);
-    color:var(--text-muted);
-    max-width:520px;
-    margin-bottom:36px;
-    line-height:1.6;
-  }
-  .cta-row{
-    display:flex;
-    gap:16px;
-    flex-wrap:wrap;
-    align-items:center;
+  /* ===== buttons ===== */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-size:14px;font-weight:500;border-radius:10px;
+    padding:10px 18px;transition:all .18s var(--ease);white-space:nowrap;
+    border:1px solid transparent;
   }
   .btn-primary{
-    position:relative;
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    padding:18px 34px;
-    border-radius:22px;
-    font-weight:700;
-    font-size:1.05rem;
-    color:#fff;
-    background:linear-gradient(135deg,var(--blue-deep),var(--cyan) 100%);
-    box-shadow:0 10px 30px rgba(37,99,235,0.45);
-    transition:transform 0.25s var(--ease-soft),box-shadow 0.35s var(--ease);
-    animation:ctaPulse 2.6s ease-in-out infinite;
-    overflow:hidden;
-    will-change:transform;
+    background:var(--accent);color:#fff;
+    box-shadow:0 1px 0 rgba(255,255,255,0.18) inset,0 8px 24px -8px rgba(91,140,255,0.55);
   }
-  .btn-primary span,.btn-primary svg{position:relative;z-index:1;transition:transform 0.25s var(--ease-soft);}
-  .btn-primary::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:inherit;
-    background:linear-gradient(135deg,rgba(255,255,255,0.45),transparent 60%);
-    opacity:0;
-    transition:opacity 0.3s var(--ease);
-  }
-  .btn-primary:hover{
-    box-shadow:0 18px 48px rgba(56,189,248,0.6);
-  }
-  .btn-primary:hover::after{opacity:1;}
-  @keyframes ctaPulse{
-    0%,100%{box-shadow:0 10px 30px rgba(37,99,235,0.45),0 0 0 0 rgba(56,189,248,0.5);}
-    50%{box-shadow:0 10px 30px rgba(37,99,235,0.45),0 0 0 14px rgba(56,189,248,0);}
-  }
-  .btn-secondary{
-    padding:18px 30px;
-    border-radius:22px;
-    font-weight:600;
-    font-size:1rem;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    backdrop-filter:blur(16px);
-    color:var(--text);
-    transition:transform 0.3s var(--ease),background 0.3s var(--ease),border-color 0.3s var(--ease);
-  }
-  .btn-secondary:hover{transform:translateY(-3px);background:var(--glass-strong);border-color:rgba(120,190,255,0.4);}
+  .btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,0.22) inset,0 12px 30px -8px rgba(91,140,255,0.65);}
+  .btn-ghost{background:rgba(255,255,255,0.02);border:1px solid var(--border-strong);color:var(--text);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.22);}
+  .btn-lg{padding:13px 24px;font-size:15px;border-radius:12px;}
 
-  .hero-tags{
-    display:flex;
-    gap:10px;
-    margin-top:36px;
-    flex-wrap:wrap;
-    font-size:0.85rem;
-    color:var(--text-muted);
-  }
-  .hero-tags span{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    padding:8px 14px;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    border-radius:14px;
-    backdrop-filter:blur(10px);
-    transition:transform 0.3s var(--ease),border-color 0.3s var(--ease);
-  }
-  .hero-tags span:hover{transform:translateY(-3px);border-color:rgba(120,190,255,0.45);}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+  /* ===== sections ===== */
+  section{position:relative;z-index:1;padding:110px 0;}
+  .section-head{max-width:600px;margin:0 auto 60px;text-align:center;}
+  .section-head .eyebrow{margin-bottom:18px;}
+  .section-head .eyebrow::before{display:none;}
+  .section-head h2{font-size:clamp(1.9rem,3.6vw,2.6rem);margin-bottom:16px;}
+  .section-head p{color:var(--muted);font-size:17px;line-height:1.6;}
 
-  /* crystal logo */
-  .crystal-wrap{
-    width:min(380px,80vw);
-    aspect-ratio:1/1;
-    position:relative;
-    animation:floaty 6s ease-in-out infinite;
-    will-change:transform;
-    transform-style:preserve-3d;
-    transition:transform 0.4s var(--ease-soft);
-  }
-  .crystal-glow{
-    position:absolute;
-    inset:-15%;
-    background:radial-gradient(circle,rgba(56,189,248,0.5),rgba(99,102,241,0.35) 45%,transparent 70%);
-    filter:blur(45px);
-    border-radius:50%;
-    animation:glowPulse 4s ease-in-out infinite;
-    z-index:0;
-  }
-  .crystal-svg{
-    position:relative;
-    z-index:1;
-    width:100%;
-    height:100%;
-    filter:drop-shadow(0 20px 50px rgba(56,189,248,0.5));
-  }
-  @keyframes floaty{
-    0%,100%{transform:translateY(0px) rotate(-2deg);}
-    50%{transform:translateY(-22px) rotate(2deg);}
-  }
-  @keyframes glowPulse{
-    0%,100%{opacity:0.7;transform:scale(1);}
-    50%{opacity:1;transform:scale(1.08);}
-  }
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s var(--ease),transform .6s var(--ease);transition-delay:var(--d,0ms);}
+  .reveal.in{opacity:1;transform:none;}
 
-  /* section headers */
-  .section-head{
-    text-align:center;
-    max-width:640px;
-    margin:0 auto 56px;
-  }
-  .section-head h2{
-    font-size:clamp(1.7rem,3.6vw,2.5rem);
-    margin-bottom:14px;
-  }
-  .section-head p{
-    color:var(--text-muted);
-    font-size:1.05rem;
-  }
+  /* ===== hero ===== */
+  .hero{padding:80px 0 96px;}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;align-items:center;}
+  .hero .eyebrow{margin-bottom:22px;}
+  .hero h1{font-size:clamp(2.5rem,5.2vw,3.7rem);letter-spacing:-0.035em;margin-bottom:22px;}
+  .hero p.lead{font-size:18px;color:var(--muted);max-width:500px;line-height:1.6;margin-bottom:32px;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px;}
+  .hero-meta{display:flex;align-items:center;gap:16px;font-size:13.5px;color:var(--dim);}
+  .hero-meta .sep{width:3px;height:3px;border-radius:50%;background:var(--dim);}
 
-  /* glass card base */
-  .glass-card{
-    position:relative;
-    background:var(--glass);
-    backdrop-filter:blur(20px) saturate(160%);
-    -webkit-backdrop-filter:blur(20px) saturate(160%);
-    border:1px solid var(--glass-border);
-    border-radius:26px;
-    box-shadow:0 8px 32px rgba(0,10,40,0.45);
-    overflow:hidden;
-    transition:transform 0.4s var(--ease),box-shadow 0.4s var(--ease),background 0.4s var(--ease),border-color 0.4s var(--ease);
+  /* ===== telegram chat mock ===== */
+  .chat{
+    width:100%;max-width:400px;margin-left:auto;
+    border:1px solid var(--border);border-radius:18px;overflow:hidden;
+    background:linear-gradient(180deg,#0F0F13,#0A0A0D);
+    box-shadow:0 40px 80px -32px rgba(0,0,0,0.8),0 0 0 1px rgba(255,255,255,0.02);
   }
-  /* cursor-following spotlight */
-  .glass-card::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:inherit;
-    background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),rgba(56,189,248,0.18),transparent 62%);
-    opacity:0;
-    mix-blend-mode:screen;
-    transition:opacity 0.4s var(--ease);
-    pointer-events:none;
-    z-index:2;
-  }
-  .glass-card:hover::after{opacity:1;}
-  .glass-card:hover{
-    transform:translateY(-8px) scale(1.015);
-    box-shadow:0 20px 55px rgba(56,189,248,0.28);
-    background:var(--glass-strong);
-    border-color:rgba(120,190,255,0.4);
-  }
+  .chat-head{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.015);}
+  .chat-avatar{width:34px;height:34px;border-radius:9px;background:linear-gradient(140deg,#1a2440,#0e1220);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
+  .chat-avatar svg{width:20px;height:20px;}
+  .chat-who{flex:1;}
+  .chat-who .n{font-size:14px;font-weight:600;}
+  .chat-who .s{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px;}
+  .chat-who .s::before{content:"";width:6px;height:6px;border-radius:50%;background:#3ECF8E;box-shadow:0 0 6px #3ECF8E;}
+  .chat-body{padding:16px;display:flex;flex-direction:column;gap:9px;}
+  .msg{max-width:82%;padding:9px 13px;font-size:13.5px;line-height:1.45;border-radius:14px;}
+  .msg.bot{align-self:flex-start;background:#16161C;border:1px solid var(--border);border-bottom-left-radius:5px;color:var(--text);}
+  .msg.me{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:5px;}
+  .vac{align-self:flex-start;width:100%;border:1px solid var(--border);border-radius:12px;padding:12px 13px;background:#101015;}
+  .vac-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
+  .vac-title{font-size:13.5px;font-weight:600;}
+  .vac-badge{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border:1px solid rgba(91,140,255,0.25);padding:2px 8px;border-radius:20px;white-space:nowrap;}
+  .vac-meta{font-size:12.5px;color:var(--muted);}
+  .vac-actions{display:flex;gap:8px;margin-top:11px;}
+  .vac-actions button{flex:1;font-size:12.5px;padding:7px;border-radius:8px;border:1px solid var(--border-strong);color:var(--text);transition:background .2s var(--ease);}
+  .vac-actions .apply{background:var(--accent);border-color:transparent;color:#fff;}
 
-  /* HOW IT WORKS */
-  .steps{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:24px;
-  }
-  .step-card{
-    padding:32px 26px;
-  }
-  .step-card>*{position:relative;z-index:1;}
-  .step-num{
-    position:absolute;
-    top:18px;
-    right:22px;
-    font-size:2.2rem;
-    font-weight:800;
-    color:rgba(120,160,255,0.22);
-  }
-  .step-icon{
-    width:56px;height:56px;
-    border-radius:18px;
-    display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
-    margin-bottom:20px;
-    box-shadow:0 8px 22px rgba(56,189,248,0.35);
-    transition:transform 0.4s var(--ease);
-  }
-  .glass-card:hover .step-icon{transform:translateY(-3px) rotate(-6deg) scale(1.06);}
-  .step-icon svg{width:26px;height:26px;stroke:#fff;}
-  .step-card h3{font-size:1.15rem;margin-bottom:10px;}
-  .step-card p{color:var(--text-muted);font-size:0.94rem;line-height:1.55;}
+  /* ===== steps ===== */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .step{border:1px solid var(--border);border-radius:14px;padding:26px 22px;background:var(--card);transition:border-color .25s var(--ease),background .25s var(--ease),transform .25s var(--ease);}
+  .step:hover{border-color:var(--border-strong);background:var(--card-hover);transform:translateY(-3px);}
+  .step .num{font-size:12px;font-weight:600;color:var(--accent);letter-spacing:0.08em;margin-bottom:18px;}
+  .step .ic{width:20px;height:20px;margin-bottom:14px;color:var(--text);}
+  .step h3{font-size:15.5px;margin-bottom:8px;}
+  .step p{font-size:14px;color:var(--muted);line-height:1.55;}
 
-  /* FEATURES */
-  .features-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:24px;
-  }
-  .feature-card{
-    padding:30px 24px;
-    text-align:left;
-  }
-  .feature-card>*{position:relative;z-index:1;}
-  .feature-card .step-icon{margin-bottom:18px;}
-  .feature-card h3{font-size:1.05rem;margin-bottom:8px;}
-  .feature-card p{font-size:0.9rem;color:var(--text-muted);line-height:1.5;}
+  /* ===== features ===== */
+  .features{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  .feat{display:flex;gap:16px;border:1px solid var(--border);border-radius:14px;padding:24px;background:var(--card);transition:border-color .25s var(--ease),background .25s var(--ease);}
+  .feat:hover{border-color:var(--border-strong);background:var(--card-hover);}
+  .feat-ic{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--accent);background:var(--accent-soft);}
+  .feat-ic svg{width:19px;height:19px;}
+  .feat h3{font-size:15.5px;margin-bottom:6px;}
+  .feat p{font-size:14px;color:var(--muted);line-height:1.55;}
 
-  /* STATS */
-  .stats-panel{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:24px;
-    padding:52px 40px;
-  }
-  .stats-panel>*{position:relative;z-index:1;}
-  .stat{
-    text-align:center;
-  }
-  .stat-num{
-    font-family:'Manrope',sans-serif;
-    font-size:clamp(2.2rem,5vw,3.2rem);
-    font-weight:800;
-    background:linear-gradient(120deg,var(--cyan),var(--blue),var(--indigo));
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-  }
-  .stat-label{
-    margin-top:8px;
-    color:var(--text-muted);
-    font-weight:600;
-    font-size:0.95rem;
-  }
+  /* ===== stats ===== */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--card);}
+  .stat{padding:38px 28px;text-align:center;border-right:1px solid var(--border);}
+  .stat:last-child{border-right:none;}
+  .stat .v{font-size:clamp(2rem,4vw,2.8rem);font-weight:600;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;}
+  .stat .l{margin-top:8px;font-size:14px;color:var(--muted);}
 
-  /* CATEGORIES */
-  .chips{
-    display:flex;
-    flex-wrap:wrap;
-    gap:14px;
-    justify-content:center;
-  }
-  .chip{
-    padding:12px 24px;
-    border-radius:100px;
-    background:var(--glass);
-    border:1px solid var(--glass-border);
-    backdrop-filter:blur(14px);
-    font-weight:600;
-    font-size:0.95rem;
-    color:var(--text);
-    display:flex;
-    align-items:center;
-    gap:8px;
-    transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease),background 0.3s var(--ease),border-color 0.3s var(--ease),color 0.3s var(--ease);
-  }
-  .chip:hover{
-    transform:translateY(-4px) scale(1.05);
-    background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
-    border-color:transparent;
-    color:#fff;
-    box-shadow:0 10px 26px rgba(56,189,248,0.4);
-  }
+  /* ===== categories ===== */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+  .chip{font-size:14px;color:var(--muted);border:1px solid var(--border);border-radius:9px;padding:9px 16px;background:var(--card);transition:all .2s var(--ease);}
+  .chip:hover{color:var(--text);border-color:var(--border-strong);background:var(--card-hover);}
 
-  /* FINAL CTA */
-  .final-cta{
-    text-align:center;
-    padding:70px 40px;
-    position:relative;
-    overflow:hidden;
-    background:linear-gradient(135deg,rgba(59,130,246,0.18),rgba(56,189,248,0.16));
-  }
-  .final-cta>*{position:relative;z-index:1;}
-  .final-cta h2{
-    font-size:clamp(1.8rem,4vw,2.6rem);
-    margin-bottom:16px;
-  }
-  .final-cta p{
-    color:var(--text-muted);
-    max-width:520px;
-    margin:0 auto 34px;
-    font-size:1.05rem;
-  }
+  /* ===== cta ===== */
+  .cta{border:1px solid var(--border);border-radius:20px;padding:64px 40px;text-align:center;position:relative;overflow:hidden;background:var(--bg-elev);}
+  .cta::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 50% 0%,rgba(91,140,255,0.14),transparent 65%);pointer-events:none;}
+  .cta>*{position:relative;}
+  .cta h2{font-size:clamp(1.9rem,4vw,2.7rem);margin-bottom:14px;}
+  .cta p{color:var(--muted);font-size:17px;max-width:480px;margin:0 auto 30px;line-height:1.6;}
 
-  /* FOOTER */
-  footer{
-    padding:50px 0 40px;
-    text-align:center;
-  }
-  .footer-inner{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:18px;
-  }
-  .footer-links{
-    display:flex;
-    gap:24px;
-    flex-wrap:wrap;
-    justify-content:center;
-    font-size:0.9rem;
-    color:var(--text-muted);
-  }
-  .footer-links a{transition:color 0.3s var(--ease);}
-  .footer-links a:hover{color:var(--cyan);}
-  .footer-copy{font-size:0.82rem;color:#6D80AA;}
+  /* ===== footer ===== */
+  footer{border-top:1px solid var(--border);padding:40px 0;}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .foot-links{display:flex;gap:26px;flex-wrap:wrap;}
+  .foot-links a{font-size:14px;color:var(--muted);transition:color .2s var(--ease);}
+  .foot-links a:hover{color:var(--text);}
+  .foot-copy{font-size:13px;color:var(--dim);}
 
   @media (prefers-reduced-motion:reduce){
-    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;}
-    .reveal{opacity:1 !important;transform:none !important;}
+    *{animation:none !important;transition:none !important;}
+    .reveal{opacity:1;transform:none;}
   }
 
-  @media (max-width:980px){
-    .hero .container{flex-direction:column;text-align:center;gap:36px;}
-    .hero-content{flex-basis:auto;}
-    .hero-sub{margin-left:auto;margin-right:auto;}
-    .cta-row{justify-content:center;}
-    .hero-tags{justify-content:center;}
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:44px;}
+    .chat{margin:0 auto;}
+    .nav-links{display:none;}
     .steps{grid-template-columns:repeat(2,1fr);}
-    .features-grid{grid-template-columns:repeat(2,1fr);}
-    .stats-panel{grid-template-columns:repeat(3,1fr);padding:40px 20px;}
   }
   @media (max-width:640px){
-    section{padding:64px 0;}
-    .nav-cta{padding:9px 14px;font-size:0.8rem;}
+    section{padding:80px 0;}
+    .hero{padding:56px 0 72px;}
+    .features{grid-template-columns:1fr;}
     .steps{grid-template-columns:1fr;}
-    .features-grid{grid-template-columns:1fr;}
-    .stats-panel{grid-template-columns:1fr;gap:32px;}
-    .btn-primary,.btn-secondary{width:100%;justify-content:center;text-align:center;}
-    .cta-row{flex-direction:column;width:100%;}
+    .stats{grid-template-columns:1fr;}
+    .stat{border-right:none;border-bottom:1px solid var(--border);}
+    .stat:last-child{border-bottom:none;}
+    .hero-actions{width:100%;}
+    .hero-actions .btn{flex:1;}
+    .foot{flex-direction:column;text-align:center;}
   }
 </style>
 </head>
 <body>
 
-<div class="scroll-progress" id="scrollProgress"></div>
+<!-- brand mark gradient (shared) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#85A9FF"/><stop offset="100%" stop-color="#5B8CFF"/>
+  </linearGradient>
+</defs></svg>
 
-<!-- hover companion: crystal logo that appears when hovering interactive elements -->
-<div class="cursor-star" id="cursorStar" aria-hidden="true">
-  <svg viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="curg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#7DD3FC"/>
-        <stop offset="50%" stop-color="#3B82F6"/>
-        <stop offset="100%" stop-color="#6366F1"/>
-      </linearGradient>
-    </defs>
-    <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#curg)" stroke="#bae6fd" stroke-width="1.5" stroke-opacity="0.6"/>
-  </svg>
+<div class="companion" id="companion" aria-hidden="true">
+  <svg viewBox="0 0 100 100"><path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#mark)"/></svg>
 </div>
 
-<div class="bg-decor" id="bgDecor">
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
-  <div class="blob blob3"></div>
-  <div class="blob blob4"></div>
-</div>
-
-<header id="siteHeader">
-  <div class="container">
-    <div class="nav-inner">
+<header id="hdr">
+  <div class="wrap">
+    <nav class="nav">
       <a href="#" class="brand">
-        <svg viewBox="0 0 100 100" aria-hidden="true">
-          <defs>
-            <linearGradient id="navg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#38BDF8"/>
-              <stop offset="50%" stop-color="#3B82F6"/>
-              <stop offset="100%" stop-color="#6366F1"/>
-            </linearGradient>
-          </defs>
-          <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#0B1120" stroke-width="2"/>
-        </svg>
+        <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#mark)"/></svg>
         MizoJob
       </a>
-      <a href="https://t.me/MizoJobRobot" class="nav-cta" target="_blank" rel="noopener">Открыть в Telegram</a>
-    </div>
+      <div class="nav-links">
+        <a href="#how">Как работает</a>
+        <a href="#features">Возможности</a>
+        <a href="#categories">Категории</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://t.me/MizoJobRobot" class="btn btn-primary" target="_blank" rel="noopener">Открыть в Telegram</a>
+      </div>
+    </nav>
   </div>
 </header>
 
 <main>
+  <!-- HERO -->
   <section class="hero">
-    <div class="container">
-      <div class="hero-content reveal in-view">
-        <span class="eyebrow">✨ Умный подбор вакансий в Telegram</span>
-        <h1 class="hero-title">Найди работу мечты <span class="gradient-text">за пару минут</span></h1>
-        <p class="hero-sub">MizoJob — бот, который подбирает вакансии под тебя и находит идеальный матч между соискателем и работодателем. Никаких бесконечных сайтов и резюме в пустоту.</p>
-        <div class="cta-row">
-          <a href="https://t.me/MizoJobRobot" class="btn-primary" target="_blank" rel="noopener">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21.5 3.5L2.5 11L9 13.5M21.5 3.5L15.5 21L9 13.5M21.5 3.5L9 13.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>Открыть в Telegram</span>
-          </a>
-          <a href="#how" class="btn-secondary">Как это работает</a>
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="reveal in">
+          <span class="eyebrow">Подбор вакансий в Telegram</span>
+          <h1>Работа, которая подходит именно тебе</h1>
+          <p class="lead">MizoJob подбирает вакансии под твой профиль и соединяет с работодателями напрямую в Telegram. Без сайтов, форм и резюме в пустоту.</p>
+          <div class="hero-actions">
+            <a href="https://t.me/MizoJobRobot" class="btn btn-primary btn-lg" target="_blank" rel="noopener">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21.5 3.5L2.5 11L9 13.5M21.5 3.5L15.5 21L9 13.5M21.5 3.5L9 13.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Начать в Telegram
+            </a>
+            <a href="#how" class="btn btn-ghost btn-lg">Как это работает</a>
+          </div>
+          <div class="hero-meta">
+            <span>Бесплатно</span><span class="sep"></span>
+            <span>48 000+ пользователей</span><span class="sep"></span>
+            <span>Ответ за минуты</span>
+          </div>
         </div>
-        <div class="hero-tags">
-          <span><i class="dot"></i>Бесплатно</span>
-          <span><i class="dot"></i>Без регистрации на сайтах</span>
-          <span><i class="dot"></i>Ответ за минуты</span>
-        </div>
-      </div>
-      <div class="hero-visual reveal in-view">
-        <div class="crystal-wrap" id="crystal">
-          <div class="crystal-glow"></div>
-          <svg class="crystal-svg" viewBox="0 0 200 200">
-            <defs>
-              <linearGradient id="crystalMain" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#7DD3FC"/>
-                <stop offset="35%" stop-color="#38BDF8"/>
-                <stop offset="65%" stop-color="#3B82F6"/>
-                <stop offset="100%" stop-color="#6366F1"/>
-              </linearGradient>
-              <linearGradient id="crystalShine" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-                <stop offset="50%" stop-color="#bae6fd" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <path d="M100 8 L128 72 L192 100 L128 128 L100 192 L72 128 L8 100 L72 72 Z"
-                  fill="url(#crystalMain)" stroke="#cfeaff" stroke-width="2" stroke-opacity="0.6"/>
-            <path d="M100 8 L128 72 L100 100 L72 72 Z" fill="url(#crystalShine)" opacity="0.85"/>
-            <path d="M192 100 L128 72 L100 100 L128 128 Z" fill="#ffffff" opacity="0.16"/>
-            <path d="M100 76 L116 84 L124 100 L116 116 L100 124 L84 116 L76 100 L84 84 Z"
-                  fill="#0A1838" fill-opacity="0.55" stroke="#7DD3FC" stroke-width="1.5"/>
-            <path d="M100 76 L116 84 L124 100 L116 116 L100 124 L84 116 L76 100 L84 84 Z"
-                  fill="#1E3A8A" fill-opacity="0.35"/>
-          </svg>
+
+        <div class="reveal in" style="--d:120ms">
+          <div class="chat">
+            <div class="chat-head">
+              <div class="chat-avatar"><svg viewBox="0 0 100 100"><path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#mark)"/></svg></div>
+              <div class="chat-who"><div class="n">MizoJob</div><div class="s">бот · онлайн</div></div>
+            </div>
+            <div class="chat-body">
+              <div class="msg bot">Привет 👋 Кого ищем? Опиши роль, формат и зарплату.</div>
+              <div class="msg me">Frontend-разработчик, удалёнка, от 200к</div>
+              <div class="msg bot">Нашёл 12 вакансий. Лучшее совпадение:</div>
+              <div class="vac">
+                <div class="vac-top">
+                  <div class="vac-title">Senior Frontend Developer</div>
+                  <div class="vac-badge">96% матч</div>
+                </div>
+                <div class="vac-meta">Удалённо · 220 000 – 280 000 ₽ · React, TS</div>
+                <div class="vac-actions">
+                  <button class="apply">Откликнуться</button>
+                  <button>Ещё вакансии</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- HOW -->
   <section id="how">
-    <div class="container">
+    <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Процесс</span>
-        <h2>Как это <span class="gradient-text">работает</span></h2>
-        <p>Четыре простых шага между тобой и новой работой</p>
+        <h2>Четыре шага до оффера</h2>
+        <p>От анкеты до ответа работодателя — без лишних действий.</p>
       </div>
       <div class="steps">
-        <div class="glass-card step-card reveal">
-          <span class="step-num">01</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h2M6 4h9l3 3v13a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg></div>
+        <div class="step reveal">
+          <div class="num">01</div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h2M6 4h9l3 3v13a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg>
           <h3>Заполни анкету</h3>
-          <p>Расскажи боту о навыках, опыте и желаемой должности — это займёт 2 минуты.</p>
+          <p>Роль, опыт и пожелания — займёт пару минут прямо в чате.</p>
         </div>
-        <div class="glass-card step-card reveal">
-          <span class="step-num">02</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
-          <h3>Бот подбирает вакансии</h3>
-          <p>Алгоритм матчинга находит подходящие предложения из проверенных компаний.</p>
+        <div class="step reveal" style="--d:70ms">
+          <div class="num">02</div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <h3>Бот подбирает</h3>
+          <p>Алгоритм матчинга находит релевантные вакансии из проверенных компаний.</p>
         </div>
-        <div class="glass-card step-card reveal">
-          <span class="step-num">03</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
-          <h3>Откликнись в один клик</h3>
-          <p>Отправляй отклик прямо в чате — без лишних форм и ожидания.</p>
+        <div class="step reveal" style="--d:140ms">
+          <div class="num">03</div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          <h3>Откликнись</h3>
+          <p>Отправляй отклик в один тап — без форм и повторного ввода данных.</p>
         </div>
-        <div class="glass-card step-card reveal">
-          <span class="step-num">04</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-          <h3>Получи работу</h3>
-          <p>Работодатель отвечает напрямую в Telegram — быстро и без посредников.</p>
+        <div class="step reveal" style="--d:210ms">
+          <div class="num">04</div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          <h3>Получи ответ</h3>
+          <p>Работодатель пишет напрямую в Telegram — быстро и без посредников.</p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- FEATURES -->
   <section id="features">
-    <div class="container">
+    <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Преимущества</span>
-        <h2>Почему выбирают <span class="gradient-text">MizoJob</span></h2>
-        <p>Всё что нужно для быстрого и приятного поиска работы</p>
+        <span class="eyebrow">Возможности</span>
+        <h2>Сделано, чтобы искать было легко</h2>
+        <p>Ничего лишнего — только то, что помогает найти работу быстрее.</p>
       </div>
-      <div class="features-grid">
-        <div class="glass-card feature-card reveal">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg></div>
-          <h3>Умный подбор</h3>
-          <p>Матчинг по навыкам, опыту и предпочтениям — только релевантные вакансии.</p>
+      <div class="features">
+        <div class="feat reveal">
+          <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 6.1L20 11l-5.8 1.9L12 19l-2.2-6.1L4 11l5.8-1.9z"/></svg></div>
+          <div><h3>Умный подбор</h3><p>Матчинг по навыкам, опыту и предпочтениям — в ленте только релевантное.</p></div>
         </div>
-        <div class="glass-card feature-card reveal">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div>
-          <h3>Актуальные вакансии</h3>
-          <p>База обновляется ежедневно — никаких закрытых или устаревших позиций.</p>
+        <div class="feat reveal" style="--d:70ms">
+          <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <div><h3>Актуальные вакансии</h3><p>База обновляется ежедневно — без закрытых и устаревших позиций.</p></div>
         </div>
-        <div class="glass-card feature-card reveal">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg></div>
-          <h3>Быстрый отклик</h3>
-          <p>Отправляй резюме и получай ответ работодателя прямо в чате Telegram.</p>
+        <div class="feat reveal" style="--d:140ms">
+          <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg></div>
+          <div><h3>Быстрый отклик</h3><p>Отклик и ответ работодателя — в одном чате, без переключений.</p></div>
         </div>
-        <div class="glass-card feature-card reveal">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-          <h3>Полностью бесплатно</h3>
-          <p>Никаких скрытых платежей и подписок — поиск работы без затрат.</p>
+        <div class="feat reveal" style="--d:210ms">
+          <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+          <div><h3>Бесплатно</h3><p>Никаких подписок и скрытых платежей для соискателей.</p></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="stats">
-    <div class="container">
-      <div class="glass-card stats-panel reveal">
-        <div class="stat">
-          <div class="stat-num" data-target="12500" data-suffix="+">0</div>
-          <div class="stat-label">Вакансий в базе</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num" data-target="48000" data-suffix="+">0</div>
-          <div class="stat-label">Пользователей бота</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num" data-target="9200" data-suffix="+">0</div>
-          <div class="stat-label">Трудоустроено</div>
-        </div>
+  <!-- STATS -->
+  <section id="stats" style="padding-top:0;">
+    <div class="wrap">
+      <div class="stats reveal">
+        <div class="stat"><div class="v" data-to="12500" data-suf="+">0</div><div class="l">Вакансий в базе</div></div>
+        <div class="stat"><div class="v" data-to="48000" data-suf="+">0</div><div class="l">Пользователей</div></div>
+        <div class="stat"><div class="v" data-to="9200" data-suf="+">0</div><div class="l">Трудоустроено</div></div>
       </div>
     </div>
   </section>
 
+  <!-- CATEGORIES -->
   <section id="categories">
-    <div class="container">
+    <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Категории</span>
-        <h2>Вакансии на <span class="gradient-text">любой вкус</span></h2>
-        <p>От удалёнки до офиса — подберём то, что подходит именно тебе</p>
+        <h2>Вакансии в разных сферах</h2>
+        <p>От удалёнки до офиса — подберём под твой профиль.</p>
       </div>
       <div class="chips reveal">
-        <span class="chip">💻 IT и разработка</span>
-        <span class="chip">📈 Маркетинг</span>
-        <span class="chip">💼 Продажи</span>
-        <span class="chip">🏠 Удалёнка</span>
-        <span class="chip">🎨 Дизайн</span>
-        <span class="chip">📊 Аналитика</span>
-        <span class="chip">🤝 HR</span>
-        <span class="chip">📦 Логистика</span>
-        <span class="chip">🎧 Поддержка</span>
-        <span class="chip">✍️ Копирайтинг</span>
+        <span class="chip">IT и разработка</span>
+        <span class="chip">Маркетинг</span>
+        <span class="chip">Продажи</span>
+        <span class="chip">Удалёнка</span>
+        <span class="chip">Дизайн</span>
+        <span class="chip">Аналитика</span>
+        <span class="chip">HR</span>
+        <span class="chip">Логистика</span>
+        <span class="chip">Поддержка</span>
+        <span class="chip">Копирайтинг</span>
       </div>
     </div>
   </section>
 
-  <section id="final-cta">
-    <div class="container">
-      <div class="glass-card final-cta reveal">
-        <h2>Готов найти работу <span class="gradient-text">мечты?</span></h2>
-        <p>Открой MizoJob в Telegram и получи первые подходящие вакансии уже сегодня.</p>
-        <a href="https://t.me/MizoJobRobot" class="btn-primary" target="_blank" rel="noopener" style="justify-content:center;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21.5 3.5L2.5 11L9 13.5M21.5 3.5L15.5 21L9 13.5M21.5 3.5L9 13.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Открыть в Telegram</span>
+  <!-- CTA -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="cta reveal">
+        <h2>Найди работу в Telegram</h2>
+        <p>Открой MizoJob и получи первые подходящие вакансии уже сегодня.</p>
+        <a href="https://t.me/MizoJobRobot" class="btn btn-primary btn-lg" target="_blank" rel="noopener">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21.5 3.5L2.5 11L9 13.5M21.5 3.5L15.5 21L9 13.5M21.5 3.5L9 13.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Открыть в Telegram
         </a>
       </div>
     </div>
@@ -809,173 +429,66 @@
 </main>
 
 <footer>
-  <div class="container">
-    <div class="footer-inner">
-      <div class="brand">
-        <svg viewBox="0 0 100 100" width="26" height="26" aria-hidden="true">
-          <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#0B1120" stroke-width="2"/>
-        </svg>
+  <div class="wrap">
+    <div class="foot">
+      <a href="#" class="brand">
+        <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#mark)"/></svg>
         MizoJob
+      </a>
+      <div class="foot-links">
+        <a href="https://t.me/MizoJobRobot" target="_blank" rel="noopener">Telegram-бот</a>
+        <a href="#how">Как работает</a>
+        <a href="#features">Возможности</a>
+        <a href="#categories">Категории</a>
       </div>
-      <div class="footer-links">
-        <a href="https://t.me/MizoJobRobot" target="_blank" rel="noopener">Открыть бота</a>
-        <a href="#how">Как это работает</a>
-        <a href="#features">Преимущества</a>
-        <a href="#categories">Вакансии</a>
-      </div>
-      <div class="footer-copy">© 2026 MizoJob. Все права защищены.</div>
+      <div class="foot-copy">© 2026 MizoJob</div>
     </div>
   </div>
 </footer>
 
 <script>
 (function(){
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ===== scroll reveal with stagger ===== */
-  const revealEls = document.querySelectorAll('.reveal');
-  // stagger siblings inside grids
-  document.querySelectorAll('.steps, .features-grid, .chips').forEach(group=>{
-    Array.from(group.children).forEach((child, i)=>{
-      if(child.classList.contains('reveal')) child.style.setProperty('--reveal-delay', (i*90)+'ms');
+  // reveal on scroll
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:0.14});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+  // counters
+  var cIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target, to=+el.dataset.to, suf=el.dataset.suf||'', t0=performance.now(), dur=1600;
+      (function tick(now){
+        var p=Math.min((now-t0)/dur,1), v=Math.floor((1-Math.pow(1-p,3))*to);
+        el.textContent=v.toLocaleString('ru-RU')+suf;
+        if(p<1) requestAnimationFrame(tick); else el.textContent=to.toLocaleString('ru-RU')+suf;
+      })(t0);
+      cIO.unobserve(el);
     });
-  });
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }
-    });
-  },{threshold:0.15});
-  revealEls.forEach(el=>io.observe(el));
+  },{threshold:0.5});
+  document.querySelectorAll('[data-to]').forEach(function(el){ cIO.observe(el); });
 
-  /* ===== animated counters ===== */
-  const counters = document.querySelectorAll('.stat-num');
-  const counterIO = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        const el = entry.target;
-        const target = parseInt(el.dataset.target,10);
-        const suffix = el.dataset.suffix || '';
-        const duration = 1800;
-        const start = performance.now();
-        function tick(now){
-          const progress = Math.min((now-start)/duration,1);
-          const eased = 1 - Math.pow(1-progress,3);
-          el.textContent = Math.floor(eased*target).toLocaleString('ru-RU') + suffix;
-          if(progress < 1){ requestAnimationFrame(tick); }
-          else { el.textContent = target.toLocaleString('ru-RU') + suffix; }
-        }
-        requestAnimationFrame(tick);
-        counterIO.unobserve(el);
-      }
-    });
-  },{threshold:0.4});
-  counters.forEach(el=>counterIO.observe(el));
+  // sticky header state
+  var hdr=document.getElementById('hdr');
+  addEventListener('scroll',function(){ hdr.classList.toggle('scrolled', scrollY>10); },{passive:true});
 
-  /* ===== header shadow on scroll + progress bar ===== */
-  const header = document.getElementById('siteHeader');
-  const progress = document.getElementById('scrollProgress');
-  function onScroll(){
-    const st = window.scrollY || document.documentElement.scrollTop;
-    header.classList.toggle('scrolled', st > 20);
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.width = (h>0 ? (st/h*100) : 0) + '%';
-  }
-  window.addEventListener('scroll', onScroll, {passive:true});
-  onScroll();
-
-  /* ===== crystal hero tilt ===== */
-  const crystal = document.getElementById('crystal');
-  const heroVisual = document.querySelector('.hero-visual');
-  if(crystal && heroVisual && !reduceMotion){
-    heroVisual.addEventListener('mousemove', (e)=>{
-      const rect = heroVisual.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      crystal.style.transform = `rotateY(${x*22}deg) rotateX(${-y*22}deg)`;
-    });
-    heroVisual.addEventListener('mouseleave', ()=>{ crystal.style.transform = ''; });
-  }
-
-  /* ===== spotlight follow on glass cards ===== */
-  document.querySelectorAll('.glass-card').forEach(card=>{
-    card.addEventListener('mousemove', (e)=>{
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', (e.clientX - r.left)+'px');
-      card.style.setProperty('--my', (e.clientY - r.top)+'px');
-    });
-  });
-
-  /* ===== magnetic primary buttons ===== */
-  if(!reduceMotion){
-    document.querySelectorAll('.btn-primary').forEach(btn=>{
-      const inner = btn.querySelector('span');
-      btn.addEventListener('mousemove',(e)=>{
-        const r = btn.getBoundingClientRect();
-        const mx = (e.clientX - r.left - r.width/2);
-        const my = (e.clientY - r.top - r.height/2);
-        btn.style.transform = `translate(${mx*0.15}px, ${my*0.25}px) translateY(-3px)`;
-        if(inner) inner.style.transform = `translate(${mx*0.08}px, ${my*0.12}px)`;
-      });
-      btn.addEventListener('mouseleave',()=>{
-        btn.style.transform = '';
-        if(inner) inner.style.transform = '';
-      });
-    });
-  }
-
-  /* ===== floating particles ===== */
-  const decor = document.getElementById('bgDecor');
-  if(!reduceMotion){
-    const particleCount = window.innerWidth < 640 ? 10 : 20;
-    for(let i=0;i<particleCount;i++){
-      const p = document.createElement('div');
-      p.className = 'particle';
-      const size = 4 + Math.random()*8;
-      p.style.width = size+'px';
-      p.style.height = size+'px';
-      p.style.left = Math.random()*100+'%';
-      p.style.bottom = -(20+Math.random()*30)+'px';
-      p.style.animationDuration = (10+Math.random()*14)+'s';
-      p.style.animationDelay = -(Math.random()*20)+'s';
-      decor.appendChild(p);
-    }
-  }
-
-  /* ===== hover companion: crystal logo appears & follows only while hovering ===== */
-  const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-  const star = document.getElementById('cursorStar');
-  if(star && finePointer && !reduceMotion){
-    const interactive = 'a, button, .chip, .glass-card, [role="button"]';
-    let mx = window.innerWidth/2, my = window.innerHeight/2;
-    let sx = mx, sy = my;        // smoothed position
-    let scale = 0, targetScale = 0;
-    let pressing = false;
-
-    window.addEventListener('mousemove', (e)=>{ mx = e.clientX; my = e.clientY; });
-    window.addEventListener('mousedown', ()=>{ pressing = true; });
-    window.addEventListener('mouseup',   ()=>{ pressing = false; });
-
-    // show when entering an interactive element, hide when truly leaving it
-    document.addEventListener('mouseover', (e)=>{
-      if(e.target.closest(interactive)){ targetScale = 1; star.style.opacity = 1; }
-    });
-    document.addEventListener('mouseout', (e)=>{
-      const from = e.target.closest(interactive);
-      const to = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest(interactive) : null;
-      if(from && from !== to){ targetScale = 0; }
-    });
-
-    function raf(){
-      sx += (mx - sx) * 0.22;
-      sy += (my - sy) * 0.22;
-      const ts = targetScale * (pressing ? 0.7 : 1);
-      scale += (ts - scale) * 0.2;
-      if(scale < 0.02){ star.style.opacity = 0; }
-      // sit just off the pointer (bottom-right) as a companion sparkle
-      star.style.transform = `translate(${sx + 16}px, ${sy + 16}px) translate(-50%,-50%) scale(${scale.toFixed(3)})`;
+  // subtle crystal hover companion (keeps system cursor)
+  var fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var star = document.getElementById('companion');
+  if(fine && !reduce && star){
+    var sel='a, button, .chip, .step, .feat', mx=innerWidth/2, my=innerHeight/2, sx=mx, sy=my, sc=0, tsc=0;
+    addEventListener('mousemove',function(e){ mx=e.clientX; my=e.clientY; });
+    document.addEventListener('mouseover',function(e){ if(e.target.closest(sel)){ tsc=1; star.style.opacity=1; } });
+    document.addEventListener('mouseout',function(e){ var f=e.target.closest(sel), t=e.relatedTarget&&e.relatedTarget.closest?e.relatedTarget.closest(sel):null; if(f&&f!==t) tsc=0; });
+    (function raf(){
+      sx+=(mx-sx)*0.25; sy+=(my-sy)*0.25; sc+=(tsc-sc)*0.2;
+      if(sc<0.02) star.style.opacity=0;
+      star.style.transform='translate('+(sx+14)+'px,'+(sy+14)+'px) translate(-50%,-50%) scale('+sc.toFixed(3)+')';
       requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    })();
   }
 })();
 </script>
