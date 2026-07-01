@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>JobCrystal — Найди работу мечты в Telegram</title>
-<meta name="description" content="Telegram-бот, который подбирает вакансии и находит идеальный матч между тобой и работодателем.">
+<title>MizoJob — Найди работу мечты в Telegram</title>
+<meta name="description" content="MizoJob — Telegram-бот, который подбирает вакансии и находит идеальный матч между тобой и работодателем.">
 <meta name="theme-color" content="#050A1A">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2338BDF8'/%3E%3Cstop offset='50%25' stop-color='%233B82F6'/%3E%3Cstop offset='100%25' stop-color='%236366F1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z' fill='url(%23g)' stroke='%230B1120' stroke-width='2'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,7 @@
     --glass-strong:rgba(255,255,255,0.09);
     --glass-border:rgba(120,160,255,0.18);
     --ease:cubic-bezier(0.22,1,0.36,1);
+    --ease-soft:cubic-bezier(0.4,0,0.2,1);
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -51,6 +52,33 @@
   img,svg{display:block;}
   ul{list-style:none;}
   button{font-family:inherit;border:none;cursor:pointer;}
+
+  /* ===== scroll progress bar ===== */
+  .scroll-progress{
+    position:fixed;
+    top:0;left:0;
+    height:3px;width:0%;
+    z-index:100;
+    background:linear-gradient(90deg,var(--cyan),var(--blue),var(--indigo));
+    box-shadow:0 0 12px rgba(56,189,248,0.7);
+    transition:width 0.1s linear;
+  }
+
+  /* ===== hover companion (crystal logo appears when hovering elements) ===== */
+  .cursor-star{
+    position:fixed;
+    top:0;left:0;
+    width:34px;height:34px;
+    pointer-events:none;
+    z-index:9999;
+    opacity:0;
+    transform:translate(-50%,-50%) scale(0);
+    filter:drop-shadow(0 0 10px rgba(56,189,248,0.9));
+    transition:opacity 0.3s var(--ease);
+    will-change:transform,opacity;
+  }
+  .cursor-star svg{width:100%;height:100%;animation:spinSlow 6s linear infinite;}
+  @keyframes spinSlow{to{transform:rotate(360deg);}}
 
   /* background blobs & particles */
   .bg-decor{
@@ -120,6 +148,11 @@
     border:1px solid var(--glass-border);
     border-radius:22px;
     box-shadow:0 8px 30px rgba(0,10,40,0.5);
+    transition:box-shadow 0.4s var(--ease),background 0.4s var(--ease);
+  }
+  header.scrolled .nav-inner{
+    background:rgba(8,18,43,0.65);
+    box-shadow:0 10px 40px rgba(0,10,40,0.7);
   }
   .brand{
     display:flex;
@@ -129,7 +162,8 @@
     font-size:1.1rem;
     color:var(--text);
   }
-  .brand svg{width:30px;height:30px;}
+  .brand svg{width:30px;height:30px;transition:transform 0.5s var(--ease);}
+  .brand:hover svg{transform:rotate(90deg) scale(1.1);}
   .nav-cta{
     padding:10px 20px;
     border-radius:16px;
@@ -151,8 +185,9 @@
 
   .reveal{
     opacity:0;
-    transform:translateY(36px);
+    transform:translateY(38px);
     transition:opacity 0.9s var(--ease),transform 0.9s var(--ease);
+    transition-delay:var(--reveal-delay,0ms);
   }
   .reveal.in-view{
     opacity:1;
@@ -240,10 +275,12 @@
     color:#fff;
     background:linear-gradient(135deg,var(--blue-deep),var(--cyan) 100%);
     box-shadow:0 10px 30px rgba(37,99,235,0.45);
-    transition:transform 0.35s var(--ease),box-shadow 0.35s var(--ease);
+    transition:transform 0.25s var(--ease-soft),box-shadow 0.35s var(--ease);
     animation:ctaPulse 2.6s ease-in-out infinite;
     overflow:hidden;
+    will-change:transform;
   }
+  .btn-primary span,.btn-primary svg{position:relative;z-index:1;transition:transform 0.25s var(--ease-soft);}
   .btn-primary::after{
     content:"";
     position:absolute;
@@ -254,7 +291,6 @@
     transition:opacity 0.3s var(--ease);
   }
   .btn-primary:hover{
-    transform:translateY(-4px) scale(1.045);
     box-shadow:0 18px 48px rgba(56,189,248,0.6);
   }
   .btn-primary:hover::after{opacity:1;}
@@ -271,9 +307,9 @@
     border:1px solid var(--glass-border);
     backdrop-filter:blur(16px);
     color:var(--text);
-    transition:transform 0.3s var(--ease),background 0.3s var(--ease);
+    transition:transform 0.3s var(--ease),background 0.3s var(--ease),border-color 0.3s var(--ease);
   }
-  .btn-secondary:hover{transform:translateY(-3px);background:var(--glass-strong);}
+  .btn-secondary:hover{transform:translateY(-3px);background:var(--glass-strong);border-color:rgba(120,190,255,0.4);}
 
   .hero-tags{
     display:flex;
@@ -292,7 +328,9 @@
     border:1px solid var(--glass-border);
     border-radius:14px;
     backdrop-filter:blur(10px);
+    transition:transform 0.3s var(--ease),border-color 0.3s var(--ease);
   }
+  .hero-tags span:hover{transform:translateY(-3px);border-color:rgba(120,190,255,0.45);}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
 
   /* crystal logo */
@@ -303,6 +341,7 @@
     animation:floaty 6s ease-in-out infinite;
     will-change:transform;
     transform-style:preserve-3d;
+    transition:transform 0.4s var(--ease-soft);
   }
   .crystal-glow{
     position:absolute;
@@ -346,14 +385,30 @@
 
   /* glass card base */
   .glass-card{
+    position:relative;
     background:var(--glass);
     backdrop-filter:blur(20px) saturate(160%);
     -webkit-backdrop-filter:blur(20px) saturate(160%);
     border:1px solid var(--glass-border);
     border-radius:26px;
     box-shadow:0 8px 32px rgba(0,10,40,0.45);
+    overflow:hidden;
     transition:transform 0.4s var(--ease),box-shadow 0.4s var(--ease),background 0.4s var(--ease),border-color 0.4s var(--ease);
   }
+  /* cursor-following spotlight */
+  .glass-card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),rgba(56,189,248,0.18),transparent 62%);
+    opacity:0;
+    mix-blend-mode:screen;
+    transition:opacity 0.4s var(--ease);
+    pointer-events:none;
+    z-index:2;
+  }
+  .glass-card:hover::after{opacity:1;}
   .glass-card:hover{
     transform:translateY(-8px) scale(1.015);
     box-shadow:0 20px 55px rgba(56,189,248,0.28);
@@ -369,8 +424,8 @@
   }
   .step-card{
     padding:32px 26px;
-    position:relative;
   }
+  .step-card>*{position:relative;z-index:1;}
   .step-num{
     position:absolute;
     top:18px;
@@ -386,7 +441,9 @@
     background:linear-gradient(135deg,var(--blue-deep),var(--cyan));
     margin-bottom:20px;
     box-shadow:0 8px 22px rgba(56,189,248,0.35);
+    transition:transform 0.4s var(--ease);
   }
+  .glass-card:hover .step-icon{transform:translateY(-3px) rotate(-6deg) scale(1.06);}
   .step-icon svg{width:26px;height:26px;stroke:#fff;}
   .step-card h3{font-size:1.15rem;margin-bottom:10px;}
   .step-card p{color:var(--text-muted);font-size:0.94rem;line-height:1.55;}
@@ -401,6 +458,7 @@
     padding:30px 24px;
     text-align:left;
   }
+  .feature-card>*{position:relative;z-index:1;}
   .feature-card .step-icon{margin-bottom:18px;}
   .feature-card h3{font-size:1.05rem;margin-bottom:8px;}
   .feature-card p{font-size:0.9rem;color:var(--text-muted);line-height:1.5;}
@@ -412,6 +470,7 @@
     gap:24px;
     padding:52px 40px;
   }
+  .stats-panel>*{position:relative;z-index:1;}
   .stat{
     text-align:center;
   }
@@ -450,7 +509,7 @@
     display:flex;
     align-items:center;
     gap:8px;
-    transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease),background 0.3s var(--ease),border-color 0.3s var(--ease);
+    transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease),background 0.3s var(--ease),border-color 0.3s var(--ease),color 0.3s var(--ease);
   }
   .chip:hover{
     transform:translateY(-4px) scale(1.05);
@@ -468,6 +527,7 @@
     overflow:hidden;
     background:linear-gradient(135deg,rgba(59,130,246,0.18),rgba(56,189,248,0.16));
   }
+  .final-cta>*{position:relative;z-index:1;}
   .final-cta h2{
     font-size:clamp(1.8rem,4vw,2.6rem);
     margin-bottom:16px;
@@ -502,6 +562,11 @@
   .footer-links a:hover{color:var(--cyan);}
   .footer-copy{font-size:0.82rem;color:#6D80AA;}
 
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;}
+    .reveal{opacity:1 !important;transform:none !important;}
+  }
+
   @media (max-width:980px){
     .hero .container{flex-direction:column;text-align:center;gap:36px;}
     .hero-content{flex-basis:auto;}
@@ -525,6 +590,22 @@
 </head>
 <body>
 
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- hover companion: crystal logo that appears when hovering interactive elements -->
+<div class="cursor-star" id="cursorStar" aria-hidden="true">
+  <svg viewBox="0 0 100 100">
+    <defs>
+      <linearGradient id="curg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7DD3FC"/>
+        <stop offset="50%" stop-color="#3B82F6"/>
+        <stop offset="100%" stop-color="#6366F1"/>
+      </linearGradient>
+    </defs>
+    <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#curg)" stroke="#bae6fd" stroke-width="1.5" stroke-opacity="0.6"/>
+  </svg>
+</div>
+
 <div class="bg-decor" id="bgDecor">
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
@@ -532,10 +613,10 @@
   <div class="blob blob4"></div>
 </div>
 
-<header>
+<header id="siteHeader">
   <div class="container">
     <div class="nav-inner">
-      <div class="brand">
+      <a href="#" class="brand">
         <svg viewBox="0 0 100 100" aria-hidden="true">
           <defs>
             <linearGradient id="navg" x1="0" y1="0" x2="1" y2="1">
@@ -546,9 +627,9 @@
           </defs>
           <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#0B1120" stroke-width="2"/>
         </svg>
-        JobCrystal
-      </div>
-      <a href="https://t.me/" class="nav-cta" target="_blank" rel="noopener">Открыть в Telegram</a>
+        MizoJob
+      </a>
+      <a href="https://t.me/MizoJobRobot" class="nav-cta" target="_blank" rel="noopener">Открыть в Telegram</a>
     </div>
   </div>
 </header>
@@ -559,11 +640,11 @@
       <div class="hero-content reveal in-view">
         <span class="eyebrow">✨ Умный подбор вакансий в Telegram</span>
         <h1 class="hero-title">Найди работу мечты <span class="gradient-text">за пару минут</span></h1>
-        <p class="hero-sub">JobCrystal — бот, который подбирает вакансии под тебя и находит идеальный матч между соискателем и работодателем. Никаких бесконечных сайтов и резюме в пустоту.</p>
+        <p class="hero-sub">MizoJob — бот, который подбирает вакансии под тебя и находит идеальный матч между соискателем и работодателем. Никаких бесконечных сайтов и резюме в пустоту.</p>
         <div class="cta-row">
-          <a href="https://t.me/" class="btn-primary" target="_blank" rel="noopener">
+          <a href="https://t.me/MizoJobRobot" class="btn-primary" target="_blank" rel="noopener">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21.5 3.5L2.5 11L9 13.5M21.5 3.5L15.5 21L9 13.5M21.5 3.5L9 13.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Открыть в Telegram
+            <span>Открыть в Telegram</span>
           </a>
           <a href="#how" class="btn-secondary">Как это работает</a>
         </div>
@@ -644,7 +725,7 @@
     <div class="container">
       <div class="section-head reveal">
         <span class="eyebrow">Преимущества</span>
-        <h2>Почему выбирают <span class="gradient-text">JobCrystal</span></h2>
+        <h2>Почему выбирают <span class="gradient-text">MizoJob</span></h2>
         <p>Всё что нужно для быстрого и приятного поиска работы</p>
       </div>
       <div class="features-grid">
@@ -717,10 +798,10 @@
     <div class="container">
       <div class="glass-card final-cta reveal">
         <h2>Готов найти работу <span class="gradient-text">мечты?</span></h2>
-        <p>Открой бота в Telegram и получи первые подходящие вакансии уже сегодня.</p>
-        <a href="https://t.me/" class="btn-primary" target="_blank" rel="noopener" style="justify-content:center;">
+        <p>Открой MizoJob в Telegram и получи первые подходящие вакансии уже сегодня.</p>
+        <a href="https://t.me/MizoJobRobot" class="btn-primary" target="_blank" rel="noopener" style="justify-content:center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21.5 3.5L2.5 11L9 13.5M21.5 3.5L15.5 21L9 13.5M21.5 3.5L9 13.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Открыть в Telegram
+          <span>Открыть в Telegram</span>
         </a>
       </div>
     </div>
@@ -734,34 +815,39 @@
         <svg viewBox="0 0 100 100" width="26" height="26" aria-hidden="true">
           <path d="M50 4 L64 36 L96 50 L64 64 L50 96 L36 64 L4 50 L36 36 Z M50 38 L58 42 L62 50 L58 58 L50 62 L42 58 L38 50 L42 42 Z" fill="url(#navg)" stroke="#0B1120" stroke-width="2"/>
         </svg>
-        JobCrystal
+        MizoJob
       </div>
       <div class="footer-links">
-        <a href="https://t.me/" target="_blank" rel="noopener">Открыть бота</a>
+        <a href="https://t.me/MizoJobRobot" target="_blank" rel="noopener">Открыть бота</a>
         <a href="#how">Как это работает</a>
         <a href="#features">Преимущества</a>
         <a href="#categories">Вакансии</a>
       </div>
-      <div class="footer-copy">© 2026 JobCrystal. Все права защищены.</div>
+      <div class="footer-copy">© 2026 MizoJob. Все права защищены.</div>
     </div>
   </div>
 </footer>
 
 <script>
 (function(){
-  // scroll reveal
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ===== scroll reveal with stagger ===== */
   const revealEls = document.querySelectorAll('.reveal');
+  // stagger siblings inside grids
+  document.querySelectorAll('.steps, .features-grid, .chips').forEach(group=>{
+    Array.from(group.children).forEach((child, i)=>{
+      if(child.classList.contains('reveal')) child.style.setProperty('--reveal-delay', (i*90)+'ms');
+    });
+  });
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('in-view');
-        io.unobserve(e.target);
-      }
+      if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }
     });
   },{threshold:0.15});
   revealEls.forEach(el=>io.observe(el));
 
-  // counters
+  /* ===== animated counters ===== */
   const counters = document.querySelectorAll('.stat-num');
   const counterIO = new IntersectionObserver((entries)=>{
     entries.forEach(entry=>{
@@ -774,13 +860,9 @@
         function tick(now){
           const progress = Math.min((now-start)/duration,1);
           const eased = 1 - Math.pow(1-progress,3);
-          const value = Math.floor(eased*target);
-          el.textContent = value.toLocaleString('ru-RU') + suffix;
-          if(progress < 1){
-            requestAnimationFrame(tick);
-          } else {
-            el.textContent = target.toLocaleString('ru-RU') + suffix;
-          }
+          el.textContent = Math.floor(eased*target).toLocaleString('ru-RU') + suffix;
+          if(progress < 1){ requestAnimationFrame(tick); }
+          else { el.textContent = target.toLocaleString('ru-RU') + suffix; }
         }
         requestAnimationFrame(tick);
         counterIO.unobserve(el);
@@ -789,35 +871,111 @@
   },{threshold:0.4});
   counters.forEach(el=>counterIO.observe(el));
 
-  // 3D tilt on crystal logo
+  /* ===== header shadow on scroll + progress bar ===== */
+  const header = document.getElementById('siteHeader');
+  const progress = document.getElementById('scrollProgress');
+  function onScroll(){
+    const st = window.scrollY || document.documentElement.scrollTop;
+    header.classList.toggle('scrolled', st > 20);
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h>0 ? (st/h*100) : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ===== crystal hero tilt ===== */
   const crystal = document.getElementById('crystal');
   const heroVisual = document.querySelector('.hero-visual');
-  if(crystal && heroVisual){
+  if(crystal && heroVisual && !reduceMotion){
     heroVisual.addEventListener('mousemove', (e)=>{
       const rect = heroVisual.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
       crystal.style.transform = `rotateY(${x*22}deg) rotateX(${-y*22}deg)`;
     });
-    heroVisual.addEventListener('mouseleave', ()=>{
-      crystal.style.transform = '';
+    heroVisual.addEventListener('mouseleave', ()=>{ crystal.style.transform = ''; });
+  }
+
+  /* ===== spotlight follow on glass cards ===== */
+  document.querySelectorAll('.glass-card').forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left)+'px');
+      card.style.setProperty('--my', (e.clientY - r.top)+'px');
+    });
+  });
+
+  /* ===== magnetic primary buttons ===== */
+  if(!reduceMotion){
+    document.querySelectorAll('.btn-primary').forEach(btn=>{
+      const inner = btn.querySelector('span');
+      btn.addEventListener('mousemove',(e)=>{
+        const r = btn.getBoundingClientRect();
+        const mx = (e.clientX - r.left - r.width/2);
+        const my = (e.clientY - r.top - r.height/2);
+        btn.style.transform = `translate(${mx*0.15}px, ${my*0.25}px) translateY(-3px)`;
+        if(inner) inner.style.transform = `translate(${mx*0.08}px, ${my*0.12}px)`;
+      });
+      btn.addEventListener('mouseleave',()=>{
+        btn.style.transform = '';
+        if(inner) inner.style.transform = '';
+      });
     });
   }
 
-  // floating particles
+  /* ===== floating particles ===== */
   const decor = document.getElementById('bgDecor');
-  const particleCount = window.innerWidth < 640 ? 10 : 20;
-  for(let i=0;i<particleCount;i++){
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = 4 + Math.random()*8;
-    p.style.width = size+'px';
-    p.style.height = size+'px';
-    p.style.left = Math.random()*100+'%';
-    p.style.bottom = -(20+Math.random()*30)+'px';
-    p.style.animationDuration = (10+Math.random()*14)+'s';
-    p.style.animationDelay = -(Math.random()*20)+'s';
-    decor.appendChild(p);
+  if(!reduceMotion){
+    const particleCount = window.innerWidth < 640 ? 10 : 20;
+    for(let i=0;i<particleCount;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = 4 + Math.random()*8;
+      p.style.width = size+'px';
+      p.style.height = size+'px';
+      p.style.left = Math.random()*100+'%';
+      p.style.bottom = -(20+Math.random()*30)+'px';
+      p.style.animationDuration = (10+Math.random()*14)+'s';
+      p.style.animationDelay = -(Math.random()*20)+'s';
+      decor.appendChild(p);
+    }
+  }
+
+  /* ===== hover companion: crystal logo appears & follows only while hovering ===== */
+  const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const star = document.getElementById('cursorStar');
+  if(star && finePointer && !reduceMotion){
+    const interactive = 'a, button, .chip, .glass-card, [role="button"]';
+    let mx = window.innerWidth/2, my = window.innerHeight/2;
+    let sx = mx, sy = my;        // smoothed position
+    let scale = 0, targetScale = 0;
+    let pressing = false;
+
+    window.addEventListener('mousemove', (e)=>{ mx = e.clientX; my = e.clientY; });
+    window.addEventListener('mousedown', ()=>{ pressing = true; });
+    window.addEventListener('mouseup',   ()=>{ pressing = false; });
+
+    // show when entering an interactive element, hide when truly leaving it
+    document.addEventListener('mouseover', (e)=>{
+      if(e.target.closest(interactive)){ targetScale = 1; star.style.opacity = 1; }
+    });
+    document.addEventListener('mouseout', (e)=>{
+      const from = e.target.closest(interactive);
+      const to = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest(interactive) : null;
+      if(from && from !== to){ targetScale = 0; }
+    });
+
+    function raf(){
+      sx += (mx - sx) * 0.22;
+      sy += (my - sy) * 0.22;
+      const ts = targetScale * (pressing ? 0.7 : 1);
+      scale += (ts - scale) * 0.2;
+      if(scale < 0.02){ star.style.opacity = 0; }
+      // sit just off the pointer (bottom-right) as a companion sparkle
+      star.style.transform = `translate(${sx + 16}px, ${sy + 16}px) translate(-50%,-50%) scale(${scale.toFixed(3)})`;
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
   }
 })();
 </script>
